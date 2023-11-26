@@ -22,6 +22,11 @@ const initialValue = [
 //Redux Reducer Function
 const reduxReducer = (state = initialValue, action) => {
     switch (action.type) {
+        case DELETE: {
+            const filtaredState = state.filter(obj => obj.id !== action.payload.id);
+            return filtaredState;
+        }
+
         case AddNew: {
             const newMatch = {
                 name: `MATCH ${state.length + 1}`,
@@ -52,7 +57,7 @@ const render = () => {
         matchesEle.innerHTML += `
         <div class="match">
                 <div class="wrapper">
-                    <button class="lws-delete">
+                    <button class="lws-delete" data-id=${match.id} onclick='handleDelete(${match.id})'>
                         <img src="./image/delete.svg" alt="" />
                     </button>
                     <h3 class="lws-matchName">${match.name}</h3>
@@ -76,7 +81,7 @@ const render = () => {
 };
 render();
 store.subscribe(render);
- 
+
 
 //Event listeners
 addAnotherEle.addEventListener('click', () => {
@@ -84,3 +89,13 @@ addAnotherEle.addEventListener('click', () => {
         type: AddNew,
     });
 })
+
+
+const handleDelete = (id) => {
+    store.dispatch({
+        type: DELETE,
+        payload: {
+            id: id
+        }
+    })
+}
