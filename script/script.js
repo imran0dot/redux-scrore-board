@@ -37,6 +37,27 @@ const reduxReducer = (state = initialValue, action) => {
             return updateScore;
         }
 
+        case DECREMENT: {
+            const updateScore = state.map(match => {
+                if (match.id === action.payload.id) {
+                    let result = +match.result - +action.payload.value;
+                    if (result < 0) {
+                        return {
+                            ...match,
+                            result: 0
+                        }
+                    }else{
+                        return {
+                            ...match,
+                            result: result
+                        }
+                    }
+                } else {
+                    return match
+                }
+            })
+            return updateScore;
+        }
         case AddNew: {
             const newMatch = {
                 name: `MATCH ${state.length + 1}`,
@@ -91,7 +112,7 @@ const render = () => {
                         <input type="number" name="increment" class="lws-increment" />
                     </form>
 
-                    <form class="decrementForm">
+                    <form class="decrementForm" onsubmit="handleDecrement(event, ${match.id})">
                         <h4>Decrement</h4>
                         <input type="number" name="decrement" class="lws-decrement" />
                     </form>
@@ -120,6 +141,17 @@ const handleIncrement = (event, id) => {
     })
 }
 
+const handleDecrement = (event, id) => {
+    event.preventDefault();
+    const decrementValue = event.target.decrement.value;
+    store.dispatch({
+        type: DECREMENT,
+        payload: {
+            id,
+            value: decrementValue
+        }
+    })
+}
 
 addAnotherEle.addEventListener('click', () => {
     store.dispatch({
