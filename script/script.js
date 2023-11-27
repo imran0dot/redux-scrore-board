@@ -1,6 +1,7 @@
 // Dom Elements
-const addAnotherEle = document.querySelector('.lws-addMatch')
-const matchesEle = document.querySelector('.all-matches')
+const addAnotherEle = document.querySelector('.lws-addMatch');
+const matchesEle = document.querySelector('.all-matches');
+const resetEle = document.querySelector('.lws-reset')
 
 //Name Variation
 const INCREMENT = 'increment';
@@ -22,19 +23,40 @@ const initialValue = [
 //Redux Reducer Function
 const reduxReducer = (state = initialValue, action) => {
     switch (action.type) {
-        case DELETE: {
-            const filtaredState = state.filter(obj => obj.id !== action.payload.id);
-            return filtaredState;
+        case INCREMENT: {
+            const updateScore = state.map(match => {
+                if (match.id === +action.payload.id) {
+                    return {
+                        ...match,
+                        result: +match.result + +action.payload.value
+                    }
+                } else {
+                    return match;
+                }
+            })
+            return updateScore;
         }
 
         case AddNew: {
             const newMatch = {
                 name: `MATCH ${state.length + 1}`,
                 result: 0,
-                id: (state.length + 1) + 1
+                id: Math.random() * 100 + 10
             }
 
             return [...state, newMatch];
+        }
+
+        case DELETE: {
+            const filtaredState = state.filter(obj => obj.id !== action.payload.id);
+            return filtaredState;
+        }
+
+        case RESET: {
+            for (let obj of state) {
+                obj.result = 0;
+            };
+            return state;
         }
 
         default: {
@@ -48,6 +70,7 @@ const reduxReducer = (state = initialValue, action) => {
 //Create Store
 const store = Redux.createStore(reduxReducer);
 
+onchange
 
 //Render
 const render = () => {
@@ -63,10 +86,11 @@ const render = () => {
                     <h3 class="lws-matchName">${match.name}</h3>
                 </div>
                 <div class="inc-dec">
-                    <form class="incrementForm">
+                    <form class="incrementForm" onsubmit="handleIncrement(event, ${match.id})">
                         <h4>Increment</h4>
                         <input type="number" name="increment" class="lws-increment" />
                     </form>
+
                     <form class="decrementForm">
                         <h4>Decrement</h4>
                         <input type="number" name="decrement" class="lws-decrement" />
@@ -84,12 +108,30 @@ store.subscribe(render);
 
 
 //Event listeners
+const handleIncrement = (event, id) => {
+    event.preventDefault();
+    const incrementValue = event.target.increment.value;
+    store.dispatch({
+        type: INCREMENT,
+        payload: {
+            id: id,
+            value: incrementValue
+        }
+    })
+}
+
+
 addAnotherEle.addEventListener('click', () => {
     store.dispatch({
         type: AddNew,
     });
 })
 
+resetEle.addEventListener('click', () => {
+    store.dispatch({
+        type: RESET
+    })
+})
 
 const handleDelete = (id) => {
     store.dispatch({
